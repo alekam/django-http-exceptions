@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = __import__('likes').get_version()
+version = __import__('http_exceptions').get_version()
 
 
 def get_requires_list(filename):
