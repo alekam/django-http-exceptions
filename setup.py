@@ -26,7 +26,7 @@ setup(
     name = 'django-http-exceptions',
     version = version,
     description = "Process HTTP exceptions raised in Dajngo Views",
-    long_description = open('README.rst').read(),
+    long_description = open('README.md').read(),
     keywords='django exceptions middleware',
     url = 'https://github.com/alekam/django-http-exceptions',
     license = 'Private',
