@@ -1,3 +1,4 @@
+
 SECRET_KEY = 'test-key'
 
 INSTALLED_APPS = [
@@ -18,3 +19,9 @@ DATABASES = {
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
 )
+
+MIDDLEWARE = [
+    'http_exceptions.middleware.ErrorHandlingMiddleware',
+]
+
+ROOT_URLCONF = 'tests.urls'
