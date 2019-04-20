@@ -1,0 +1,7 @@
+[run]
+branch = True
+plugins =
+    django_coverage_plugin
+
+[html]
+directory = public/coverage

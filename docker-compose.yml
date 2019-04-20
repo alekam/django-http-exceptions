@@ -1,0 +1,21 @@
+version: '3.3'
+
+services:
+
+    db:
+        # image: mdillon/postgis
+        image: postgres:9.6
+        env_file: .env
+
+    django:
+        image: git.elitsy.ru:5555/docker/python-tox-builder:latest
+        env_file: .env
+        volumes:
+            - .:/app
+            - /Volumes/Work/tmp/pip/:/tmp/pip
+        depends_on:
+            - db
+            - redis
+
+    redis:
+        image: redis:latest
