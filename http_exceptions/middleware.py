@@ -3,7 +3,7 @@
 import traceback
 
 from django.conf import settings
-from django.http.response import JsonResponse
+from django.http.response import JsonResponse, Http404
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -13,13 +13,14 @@ class ErrorHandlingMiddleware(MiddlewareMixin):
         if not isinstance(exception, Exception):
             return
 
+        # if not request.is_ajax() or not request.GET.get('format') == 'json':
+        #     return
+
         data = {
             'status': False,
             'exception': exception.__class__.__name__,
+            'message': unicode(exception),
         }
-
-        if exception.message:
-            data['message'] = exception.message
 
 #         try:
 #             data['message'] = formatters.render_formatted_error(request, exception)
@@ -37,6 +38,8 @@ class ErrorHandlingMiddleware(MiddlewareMixin):
 
         if hasattr(exception, 'status_code'):
             status_code = exception.status_code
+        elif isinstance(exception, Http404):
+            status_code = 404
         else:
             status_code = 500
 

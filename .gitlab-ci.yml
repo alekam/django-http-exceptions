@@ -1,7 +1,7 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: python:2.7
+image: git.elitsy.ru:5555/docker/python-tox-builder:latest
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -13,48 +13,87 @@ variables:
 #
 # If you want to also cache the installed packages, you have to install
 # them in a virtualenv and cache it as well.
-cache:
-  paths:
-    - .cache/pip
-    - env/
+# cache:
+#   paths:
+#     - .cache/pip
+#     - .tox/
 
-before_script:
-  - python -V               # Print out python version for debugging
-  - pip -V
-  - pip install virtualenv
-  - virtualenv env
-  - source env/bin/activate
+stages:
+  - test
+  - build
+  - deploy
+
+# before_script:
+#   - python -V               # Print out python version for debugging
+#   - pip -V
 
 test:
+  stage: test
   script:
-  # - python setup.py test
-  - pip install tox
-  - tox
+    - tox -v -vv
   only:
-  - master
+    - master
+    - tags
+  artifacts:
+    name: "$CI_PROJECT_NAME-$CI_COMMIT_REF_NAME-reports"
+    paths:
+      - public
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+\%)$/'
+  cache:
+    paths:
+      - .cache/pip
+      - .tox/
 
-run:
+build:
+  stage: build
   script:
-  - rm -rf dist
-  - rm -rf build
-  - rm -rf *.egg-info
-  - python setup.py bdist_wheel
-  # an alternative approach is to install and run:
-  - pip install dist/*
-  # run the command here
+    - rm -rf dist
+    - rm -rf build
+    - rm -rf *.egg-info
+    - python setup.py bdist_wheel
+    - pip install dist/*
+    - python -c 'import http_exceptions; print http_exceptions.get_version()'
   artifacts:
     paths:
-    - dist/*.whl
+      - dist/*.whl
+  dependencies: []
   only:
-  - tags
+    - tags
+    - master
+  cache:
+    paths:
+      - .cache/pip
+
+deploy:
+  stage: deploy
+  script:
+    - twine upload --repository-url $PYPI_PRIVATE_URL -u $PYPI_PRIVATE_USER -p $PYPI_PRIVATE_PASSWORD dist/*.whl 
+    # - twine upload -r private ./dist/*.whl 
+  dependencies:
+    - build
+  only:
+    - tags
+
+release:
+  # релиз якобы сам создается при добавлении тэга с описанием
+  # нужно приаттачить ссылку на релиз в Nexus, сами исходники не нужны
+  # https://docs.gitlab.com/ee/api/releases/index.html
+  # https://docs.gitlab.com/ee/api/releases/links.html
+  stage: deploy
+  script:
+    - release.sh dist/*.whl
+  dependencies:
+    - build
+  only:
+    - tags
 
 .pages:
-  script:
-  - pip install sphinx sphinx-rtd-theme
-  - cd doc ; make html
-  - mv build/html/ ../public/
+  #script:
+  #- pip install sphinx sphinx-rtd-theme
+  #- cd doc ; make html
+  #- mv build/html/ ../public/
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - master
+    - master
