@@ -1,4 +1,5 @@
 
+MONULE_NAME = "http_exceptions"
 
 default: test
 
@@ -33,7 +34,7 @@ upload:
 
 
 bandit:
-	docker-compose run django bandit -r ./attachments/ > reports/bandit.txt
+	docker-compose run --rm django bandit -r ./$(MONULE_NAME)/ > public/bandit.txt
 
 
 test:
@@ -41,7 +42,7 @@ test:
 	$(MAKE) clean_reports
 	# Run `tox` on the image
 	# docker run -t -v $(shell pwd):/app -v $(PIP_CACHE_DIR):/tmp/pip/ alekam/python-tox:latest tox
-	docker-compose run django
+	docker-compose run --rm django
 	docker-compose stop
 
 
@@ -82,3 +83,8 @@ virtenv:
 	source ./venv/bin/activate; \
 	pip install -r ./requirements.txt -r ./tests/requirements.txt \
 		prospector "pylint<2.0.0" bandit flake8
+
+
+tag_version:
+	VER=$(shell python -c "import $(MONULE_NAME); print $(MONULE_NAME).get_version()"); \
+	git tag -a $$VER -m "version $$VER"
