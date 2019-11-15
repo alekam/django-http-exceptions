@@ -13,8 +13,8 @@ class ErrorHandlingMiddleware(MiddlewareMixin):
         if not isinstance(exception, Exception):
             return
 
-        # if not request.is_ajax() or not request.GET.get('format') == 'json':
-        #     return
+        if not request.is_ajax() or not request.GET.get('format') == 'json':
+            return
 
         data = {
             'status': False,
