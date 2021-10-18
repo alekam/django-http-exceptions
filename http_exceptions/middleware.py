@@ -22,14 +22,14 @@ class ErrorHandlingMiddleware(MiddlewareMixin):
             'message': unicode(exception),
         }
 
-#         try:
-#             data['message'] = formatters.render_formatted_error(request, exception)
-#         except Exception, e:
-#             # TODO: log to sentry
-#             data.update({
-#                 'message': u'No message. Error During Error Processing'
-#             })
-#             return JsonResponse(data, status_code=500)
+        # try:
+        #     data['message'] = formatters.render_formatted_error(request, exception)
+        # except Exception, e:
+        #     # TODO: log to sentry
+        #     data.update({
+        #         'message': u'No message. Error During Error Processing'
+        #     })
+        #     return JsonResponse(data, status_code=500)
 
         if settings.DEBUG:
             data.update({
